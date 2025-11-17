@@ -18,6 +18,10 @@ To run the latest version, you can add your key and change the prompt in `config
 
 Some experiments are shown in `examples/` using an older version of MegaAgent. You can use the same prompt while substituting other files with the latest version.
 
+## Contributor Guide
+
+New contributors should start with [AGENTS.md](AGENTS.md), which documents project layout, commands for running/testing, coding conventions, and review expectations.
+
 ## Experimental Results
 
 ### RQ1: Quantitative experiments using gpt-4o as backbone
