@@ -18,6 +18,23 @@ To run the latest version, you can add your key and change the prompt in `config
 
 Some experiments are shown in `examples/` using an older version of MegaAgent. You can use the same prompt while substituting other files with the latest version.
 
+## Configuration & Testing
+
+`config.py` now defaults to OpenAI's GPT-5.1 model and reads runtime overrides from environment variables:
+
+- `OPENAI_API_KEY` (or `MEGAAGENT_API_KEY`) provides credentials.
+- `MEGAAGENT_MODEL`, `OPENAI_CHAT_URL`, and `MEGAAGENT_ENABLE_WEB_SEARCH` let you change the deployed model, API endpoint, and opt into the GPT-5 web search tool.
+- `MEGAAGENT_WEB_SEARCH_MODEL` / `MEGAAGENT_WEB_SEARCH_PROVIDER` fine-tune which search backend is attached to chat completions.
+- `MEGAAGENT_TEMPERATURE` optionally overrides the thinking-model temperature; leave it unset to rely on OpenAI's default value of 1 per the latest GPT-5.1 guidance.
+
+After configuring secrets, run the regression suite from the repo root:
+
+```
+uv run pytest
+```
+
+The test harness mocks OpenAI requests and enforces at least 80% executable-line coverage on `llm.py`. Use `UV_NO_SYNC=1` when you already have the dependencies installed locally and want to skip lockfile syncing inside restricted environments.
+
 ## Contributor Guide
 
 New contributors should start with [AGENTS.md](AGENTS.md), which documents project layout, commands for running/testing, coding conventions, and review expectations.
