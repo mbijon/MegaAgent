@@ -39,8 +39,9 @@ def test_build_request_body_with_web_search(monkeypatch):
 
     assert "functions" not in body
     tool = body["tools"][0]
-    assert tool["type"] == "web_search"
-    assert tool["web_search"]["provider"] == {
+    assert tool["type"] == "custom"
+    assert tool["custom"]["name"] == "web_search"
+    assert tool["custom"]["metadata"]["provider"] == {
         "type": "gpt-5-web",
         "model": "gpt-5.1-search",
     }
@@ -79,7 +80,8 @@ def test_get_llm_response_with_web_search(monkeypatch):
 
     assert response["choices"][0]["message"]["content"] == "ok"
     tool = captured["json"]["tools"][0]
-    assert tool["type"] == "web_search"
-    assert tool["web_search"]["provider"]["type"] == config.web_search_provider
+    assert tool["type"] == "custom"
+    assert tool["custom"]["name"] == "web_search"
+    assert tool["custom"]["metadata"]["provider"]["type"] == config.web_search_provider
     assert llm.input_token == 3
     assert llm.output_token == 2

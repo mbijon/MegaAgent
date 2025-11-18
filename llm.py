@@ -186,12 +186,15 @@ def _build_web_search_tool() -> Dict[str, Any]:
     provider = getattr(config, "web_search_provider", "gpt-5-web")
     model = getattr(config, "web_search_model", config.model)
     return {
-        "type": "web_search",
-        "web_search": {
-            "provider": {
-                "type": provider,
-                "model": model,
-            }
+        "type": "custom",
+        "custom": {
+            "name": "web_search",
+            "metadata": {
+                "provider": {
+                    "type": provider,
+                    "model": model,
+                }
+            },
         },
     }
 
