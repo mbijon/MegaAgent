@@ -1,1 +1,10 @@
 __pycache__
+git.log
+
+.env
+.env.local
+.env.*.local
+
+# Local project
+logs/
+log.txt
