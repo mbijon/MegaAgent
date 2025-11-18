@@ -18,7 +18,8 @@ class Memory:
         self.initialize_logger(agent_name)
 
     def add_memory(self, memory):
-        if (memory['role']!='function' and memory['content'] != None):
+        # Support both old 'function' role and new 'tool' role for compatibility
+        if (memory.get('role') not in ('function', 'tool') and memory.get('content') != None):
             self.history_pool.add(documents=[memory['content']], ids=[str(time.time())])
         self.logger.info(str(memory))
         self.history.append(memory)
@@ -269,7 +270,8 @@ class Agent(Memory):
                 tool_call = assistant_output['function_call']
                 tool_name = tool_call['name']
                 arguments = json.loads(tool_call['arguments'])
-                tool_info = self.execute(tool_name, {"role": "function"}, arguments)
+                # Use 'tool' role for GPT-5.1 compatibility (newer models use 'tool' instead of 'function')
+                tool_info = self.execute(tool_name, {"role": "tool"}, arguments)
                 if tool_info == {}:
                     break
                 self.add_memory(tool_info)
