@@ -3,21 +3,21 @@ import os
 import shutil
 import subprocess
 
-# 文件路径
+# File paths
 val_file_path = 'travel_planner_val.xlsx'
 config_file_path = 'config.py'
 main_script_path = 'main.py'
 output_folder = './'
 plan_folder = 'files/plan.json'
 
-# 加载 Excel 文件
+# Load the Excel file
 val_data = pd.read_excel(val_file_path)
 
-# 读取 config.py 文件
+# Read config.py file
 with open(config_file_path, 'r', encoding='utf-8') as file:
     config_content = file.read()
 
-# 修改 additional_prompt 的函数
+# Function to update additional_prompt
 def update_additional_prompt(config_content, row):
     query = row['query']
     ref_info = row['reference_information']
@@ -49,21 +49,21 @@ Leave a remarkable TODO wherever there is an unfinished task. Please keep updati
     )
     return updated_content
 
-# 针对每一行进行处理
+# Iterate through each row
 for index, row in val_data.iterrows():
-    # 修改 config.py 文件
+    # Update config.py file
     updated_config_content = update_additional_prompt(config_content, row)
-    
-    # 临时保存更新后的 config.py
+
+    # Temporarily save the updated config.py
     temp_config_path = f'config.py'
     with open(temp_config_path, 'w', encoding='utf-8') as file:
         file.write(updated_config_content)
-    
-    # 运行 main.py
+
+    # Run main.py
     try:
         subprocess.run(["python", main_script_path], check=True)
-        
-        # 复制生成的 plan.json 到目标文件
+
+        # Copy the generated plan.json to the target file
         if os.path.exists(plan_folder):
             output_plan_path = os.path.join(output_folder, f'plan{index}.json')
             shutil.copy(plan_folder, output_plan_path)

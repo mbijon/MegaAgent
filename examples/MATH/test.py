@@ -4,7 +4,7 @@ import sys
 import time
 def enqueue_output(out, queue, ready_event):
     while True:
-        char = out.read(1)  # 每次读取一个字符
+        char = out.read(1)  # Read one character at a time
         if char == '':
             break
         queue.append(char)
@@ -17,39 +17,39 @@ def interactive_subprocess(program_path):
         stdin=subprocess.PIPE,
         stdout=subprocess.PIPE,
         stderr=subprocess.PIPE,
-        bufsize=0,  # 无缓冲，实时输出
+        bufsize=0,  # Disable buffering for realtime output
         text=True
     )
     
-    # 用来存储输出字符的列表
+    # Store streamed output characters
     output_chars = []
     output_ready = threading.Event()
     
-    # 启动一个线程来捕获输出
+    # Capture output in a background thread
     output_thread = threading.Thread(target=enqueue_output, args=(process.stdout, output_chars, output_ready))
     output_thread.start()
     try:
-        # 进行多轮交互
+        # Keep the REPL conversation going
         while True:
             output_ready.wait()
             time.sleep(1)
-            # 显示目前为止程序的输出
+            # Print everything produced so far
             sys.stdout.write(''.join(output_chars))
             output_chars.clear()
             sys.stdout.flush()
             output_ready.clear()
 
-            # 获取用户的输入
+            # Read user input
             user_input = input()
             if user_input.lower() == 'exit':
                 break
 
-            # 向程序发送输入
+            # Send the response to the subprocess
             process.stdin.write(user_input + '\n')
             process.stdin.flush()
             
     except KeyboardInterrupt:
-        print("交互被用户中断")
+        print("Interaction interrupted by user")
     finally:
         process.stdin.close()
         process.terminate()
@@ -57,4 +57,4 @@ def interactive_subprocess(program_path):
         output_thread.join()
 
 if __name__ == "__main__":
-    interactive_subprocess('files/main.py')  # 替换为实际的路径
+    interactive_subprocess('files/main.py')  # Replace with the actual path
