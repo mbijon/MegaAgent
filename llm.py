@@ -202,13 +202,13 @@ def _get_llm_response(messages, enable_tools=True, agent_name=''):
             "messages": messages,
             "tools": [{"type": "function", "function": tool} for tool in tools],
             "tool_choice": "auto",
-            "temperature": 0,
+            "temperature": 1,
         }
     else:
         body = {
             'model': config.model,
             "messages": messages,
-            "temperature": 0,
+            "temperature": 1,
         }
     try:
         response = requests.post(url, headers=headers, json=body)
@@ -280,7 +280,7 @@ def web_search(query, max_results=5):
                     }
                 }
             ],
-            'temperature': 0
+            'temperature': 1
         }
 
         response = requests.post(url, headers=headers, json=body, timeout=30)
