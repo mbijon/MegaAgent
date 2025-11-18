@@ -258,7 +258,9 @@ class Agent(Memory):
                 req = self.get()
                 if llm_output != None:
                     self.logger.info(f"Assistant: {llm_output}")
-                if 'function_call' not in assistant_output:
+                # Check for new 'tool_calls' format (GPT-5.1+) or old 'function_call' format
+                has_tool_call = 'tool_calls' in assistant_output or 'function_call' in assistant_output
+                if not has_tool_call:
                     self.add_dialogue("user", "Error: No function call found in the response. You must use function calls to work and communicate with other agents. If you have nothing to do now, please call 'terminate' function.")
                     req = self.get()
                     round += 1
@@ -267,11 +269,21 @@ class Agent(Memory):
 
             round = 0
             while round < config.MAX_ROUNDS:
-                tool_call = assistant_output['function_call']
-                tool_name = tool_call['name']
-                arguments = json.loads(tool_call['arguments'])
-                # Use 'tool' role for GPT-5.1 compatibility (newer models use 'tool' instead of 'function')
-                tool_info = self.execute(tool_name, {"role": "tool"}, arguments)
+                # Handle both new 'tool_calls' format and old 'function_call' format
+                if 'tool_calls' in assistant_output:
+                    # New tools API format (GPT-5.1+)
+                    tool_call = assistant_output['tool_calls'][0]
+                    tool_call_id = tool_call.get('id')
+                    tool_name = tool_call['function']['name']
+                    arguments = json.loads(tool_call['function']['arguments'])
+                else:
+                    # Old functions API format
+                    tool_call_id = None
+                    tool_call = assistant_output['function_call']
+                    tool_name = tool_call['name']
+                    arguments = json.loads(tool_call['arguments'])
+
+                tool_info = self.execute(tool_name, {"role": "tool", "tool_call_id": tool_call_id}, arguments)
                 if tool_info == {}:
                     break
                 self.add_memory(tool_info)
@@ -282,12 +294,15 @@ class Agent(Memory):
                 llm_output = assistant_output['content']
                 self.add_memory(assistant_output)
                 req += [assistant_output]
-                while 'function_call' not in assistant_output:
+                # Check for both new and old formats
+                has_tool_call = 'tool_calls' in assistant_output or 'function_call' in assistant_output
+                while not has_tool_call:
                     req += [{"role":"user", "content": "Error: No function call found in the response. You must use function calls to work and communicate with other agents. If you have nothing to do now, please call 'terminate' function."}]
                     response = get_llm_response(req, agent_name=self.name)
                     assistant_output = response['choices'][0]['message']
                     llm_output = assistant_output['content']
                     self.add_memory(assistant_output)
+                    has_tool_call = 'tool_calls' in assistant_output or 'function_call' in assistant_output
                     round += 1
 
         self.state = "idle"

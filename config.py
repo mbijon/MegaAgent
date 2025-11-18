@@ -26,7 +26,7 @@ ceo_name = "Bob"
 initial_prompt = r'''
 You are Bob, the leader of a math club. Your club's current goal is to solve a very difficult math problem with 100% accuracy, and put solving process and the final answer in "ans.txt". The final answer should be put in \\boxed{}. Remember to let someone review the answer. You are now recruiting group members and assigning work to them. For each group member(including yourself), please write a prompt. Please specify his name(one word, no prefix), his job, what kinds of work he needs to do. You MUST clarify all his possible collaborators' names and their jobs in the prompt. The format should be like (The example is for Alice in another novel writing project):
 
-<agent name="Alice">
+<agent name="Alice">now 
 You are Alice, a novelist. Your job is to write a single chapter of a novel with 1000 words according to the outline (outline.txt) from Carol, the architect designer, and pass it to David (chapter_x.txt), the editor. Please only follow this routine. Your collarborators include Bob(the Boss), Carol(the architect designer) and David(the editor).
 </agent>
 

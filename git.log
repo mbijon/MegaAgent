@@ -1,0 +1,58 @@
+Note: switching to 'd122c9df0676320008a901ba6e137d15749accb4'.
+
+You are in 'detached HEAD' state. You can look around, make experimental
+changes and commit them, and you can discard any commits you make in this
+state without impacting any branches by switching back to a branch.
+
+If you want to create a new branch to retain commits you create, you may
+do so (now or later) by using -c with the switch command. Example:
+
+  git switch -c <new-branch-name>
+
+Or undo this operation with:
+
+  git switch -
+
+Turn off this advice by setting config variable advice.detachedHead to false
+
+HEAD is now at d122c9d Initial commit
+Warning: you are leaving 1 commit behind, not connected to
+any of your branches:
+
+  1b5e8fa Update todo_Bob.txt
+
+If you want to keep it by creating a new branch, this may be a good time
+to do so with:
+
+ git branch <new-branch-name> 1b5e8fa
+
+Switched to branch 'files_branch'
+Note: switching to '1b5e8fa765f00ce4e34070579aded3c9ea213e2e'.
+
+You are in 'detached HEAD' state. You can look around, make experimental
+changes and commit them, and you can discard any commits you make in this
+state without impacting any branches by switching back to a branch.
+
+If you want to create a new branch to retain commits you create, you may
+do so (now or later) by using -c with the switch command. Example:
+
+  git switch -c <new-branch-name>
+
+Or undo this operation with:
+
+  git switch -
+
+Turn off this advice by setting config variable advice.detachedHead to false
+
+HEAD is now at 1b5e8fa Update todo_Bob.txt
+Warning: you are leaving 1 commit behind, not connected to
+any of your branches:
+
+  3dc18cc Update status_Bob.txt
+
+If you want to keep it by creating a new branch, this may be a good time
+to do so with:
+
+ git branch <new-branch-name> 3dc18cc
+
+Switched to branch 'files_branch'

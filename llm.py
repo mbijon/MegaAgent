@@ -196,10 +196,12 @@ def _get_llm_response(messages, enable_tools=True, agent_name=''):
             'Authorization':f'Bearer {api_key}'}
     gen_tools(agent_name)
     if enable_tools:
+        # Use new 'tools' API instead of deprecated 'functions'
         body = {
             'model': config.model,
             "messages": messages,
-            "functions": tools,
+            "tools": [{"type": "function", "function": tool} for tool in tools],
+            "tool_choice": "auto",
             "temperature": 0,
         }
     else:
