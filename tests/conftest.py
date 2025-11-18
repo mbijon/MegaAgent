@@ -1,8 +1,11 @@
 """
 Pytest configuration and shared fixtures for MegaAgent tests.
 """
-import pytest
+# Disable HuggingFace tokenizers parallelism to prevent fork warnings
 import os
+os.environ['TOKENIZERS_PARALLELISM'] = 'false'
+
+import pytest
 import sys
 from unittest.mock import Mock, patch, MagicMock
 import tempfile

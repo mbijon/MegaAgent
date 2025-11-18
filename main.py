@@ -1,3 +1,8 @@
+# Disable HuggingFace tokenizers parallelism to prevent fork warnings
+# This must be set before any imports that use tokenizers
+import os
+os.environ['TOKENIZERS_PARALLELISM'] = 'false'
+
 from agent import *
 import logging
 import re
