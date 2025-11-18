@@ -72,6 +72,10 @@ class TestGetLLMResponse:
         import llm
         import requests
 
+        # Reset mock to clear any previous state
+        requests.post.reset_mock()
+        mock_requests_post.reset_mock()
+
         mock_response_error = MagicMock()
         mock_response_error.json.return_value = {"error": "Rate limit"}
 
@@ -81,17 +85,35 @@ class TestGetLLMResponse:
             "usage": {"prompt_tokens": 10, "completion_tokens": 5},
         }
 
-        # CRITICAL: llm.py calls requests.post directly, so set side_effect on requests.post
-        # Since llm.requests is the requests module, llm.requests.post IS requests.post
-        requests.post.side_effect = [mock_response_error, mock_response_success]
-        mock_requests_post.side_effect = [mock_response_error, mock_response_success]
+        # CRITICAL: Set side_effect as a list that will be consumed
+        # After 2 calls, it should raise StopIteration to prevent further calls
+        # We need to ensure both mocks are aligned
+        side_effect_list = [mock_response_error, mock_response_success]
+
+        # Use a callable that raises StopIteration after the list is exhausted
+        # This prevents MagicMock from falling back to return_value
+        def side_effect_func(*args, **kwargs):
+            if side_effect_list:
+                return side_effect_list.pop(0)
+            raise StopIteration("No more side effects")
+
+        requests.post.side_effect = side_effect_func
+        mock_requests_post.side_effect = side_effect_func
+
+        # Clear return_value to ensure side_effect is used exclusively
+        requests.post.return_value = None
+        mock_requests_post.return_value = None
 
         messages = [{"role": "user", "content": "Test"}]
         response = llm.get_llm_response(messages, enable_tools=False)
 
         assert "choices" in response
         # Check call count on requests.post (the actual call site)
-        assert requests.post.call_count == 2
+        # Should be exactly 2: one error, one success
+        assert requests.post.call_count == 2, (
+            f"Expected 2 calls but got {requests.post.call_count}. "
+            f"Mock was called with: {[str(call) for call in requests.post.call_args_list]}"
+        )
 
     def test_get_llm_response_with_tools_gpt5(self, mock_requests_post, monkeypatch):
         """Test LLM response with tools for GPT-5 model."""
