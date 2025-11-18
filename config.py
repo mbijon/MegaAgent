@@ -1,6 +1,34 @@
-api_key = 'sk-your_api_key_here'
-model = "gpt-4.1"
-url = 'https://api.openai.com/v1/chat/completions'
+"""Runtime configuration for MegaAgent."""
+
+import os
+from typing import Optional
+
+
+def _get_api_websearch_from_env(var_name: str, default: bool = False) -> bool:
+    value = os.getenv(var_name)
+    if value is None:
+        return default
+    return value.strip().lower() in {"1", "true", "yes", "on"}
+
+
+def _get_api_temp_from_env(var_name: str, default: Optional[float] = None) -> Optional[float]:
+    value = os.getenv(var_name)
+    if value is None:
+        return default
+    try:
+        return float(value)
+    except ValueError:
+        return default
+
+
+api_key = os.getenv("OPENAI_API_KEY", os.getenv("MEGAAGENT_API_KEY", "sk-your_api_key_here"))
+model = os.getenv("MEGAAGENT_MODEL", "gpt-5.1")
+url = os.getenv("OPENAI_CHAT_URL", 'https://api.openai.com/v1/chat/completions')
+enable_web_search = _get_api_websearch_from_env("MEGAAGENT_ENABLE_WEB_SEARCH", True)
+web_search_model = os.getenv("MEGAAGENT_WEB_SEARCH_MODEL", "gpt-5.1")
+web_search_provider = os.getenv("MEGAAGENT_WEB_SEARCH_PROVIDER", "gpt-5-web")
+# None is safest default. New models default=1, older models not overridden where default=0.
+temperature = _get_api_temp_from_env("MEGAAGENT_TEMPERATURE")
 
 MAX_MEMORY = 10
 MAX_ROUNDS = 20

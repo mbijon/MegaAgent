@@ -112,12 +112,13 @@ def _get_llm_response(messages):
     body = {
         'model': config.model,
         "messages": messages,
-        "temperature": 0,
         # "parameters": {
         #     "result_format": "message",
         "functions": tools
         # }
     }
+    if getattr(config, "temperature", None) is not None:
+        body["temperature"] = config.temperature
     try:
         response = requests.post(url, headers=headers, json=body)
         # print(response.content)

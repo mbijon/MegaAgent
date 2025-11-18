@@ -1,9 +1,19 @@
 import config
-import requests
 import os
 import json
 import logging
 import time
+from typing import Any, Dict, List, Optional
+
+try:
+    import requests
+except ModuleNotFoundError:  # pragma: no cover - executed only when dependency is missing
+    class _RequestsStub:
+        @staticmethod
+        def post(*_, **__):
+            raise RuntimeError("The 'requests' package is required to reach the OpenAI API. Install it via uv before running.")
+
+    requests = _RequestsStub()  # type: ignore[assignment]
 written_files = dict()
 used_names = set()
 tools = []
@@ -166,25 +176,54 @@ def gen_tools(agent_name):
     ]
 
 
-def _get_llm_response(messages, enable_tools=True, agent_name=''):
+def _should_use_web_search(use_web_search: Optional[bool]) -> bool:
+    if use_web_search is None:
+        return getattr(config, "enable_web_search", False)
+    return use_web_search
+
+
+def _build_web_search_tool() -> Dict[str, Any]:
+    provider = getattr(config, "web_search_provider", "gpt-5-web")
+    model = getattr(config, "web_search_model", config.model)
+    return {
+        "type": "custom",
+        "custom": {
+            "name": "web_search",
+            "metadata": {
+                "provider": {
+                    "type": provider,
+                    "model": model,
+                }
+            },
+        },
+    }
+
+
+def build_request_body(messages: List[Dict[str, Any]], enable_tools: bool = True,
+                       agent_name: str = '', use_web_search: Optional[bool] = None) -> Dict[str, Any]:
+    gen_tools(agent_name)
+    body: Dict[str, Any] = {
+        'model': config.model,
+        "messages": messages,
+    }
+    temperature = getattr(config, "temperature", None)
+    if temperature is not None:
+        body["temperature"] = temperature
+    if enable_tools:
+        body["functions"] = tools
+    if _should_use_web_search(use_web_search):
+        body["tools"] = [
+            _build_web_search_tool()
+        ]
+    return body
+
+
+def _get_llm_response(messages, enable_tools=True, agent_name='', use_web_search=None):
     api_key = config.api_key
     url = config.url
     headers = {'Content-Type': 'application/json',
             'Authorization':f'Bearer {api_key}'}
-    gen_tools(agent_name)
-    if enable_tools:
-        body = {
-            'model': config.model,
-            "messages": messages,
-            "functions": tools,
-            "temperature": 0,
-        }
-    else:
-        body = {
-            'model': config.model,
-            "messages": messages,
-            "temperature": 0,
-        }
+    body = build_request_body(messages, enable_tools, agent_name, use_web_search)
     try:
         response = requests.post(url, headers=headers, json=body)
         # print(response.content)
@@ -192,12 +231,12 @@ def _get_llm_response(messages, enable_tools=True, agent_name=''):
     except Exception as e:
         return {'error': e}
 
-def get_llm_response(messages, enable_tools=True, agent_name=''):
-    response = _get_llm_response(messages, enable_tools, agent_name)
+def get_llm_response(messages, enable_tools=True, agent_name='', use_web_search=None):
+    response = _get_llm_response(messages, enable_tools, agent_name, use_web_search)
     while 'choices' not in response:
         logging.error(response)
         # time.sleep(3)
-        response = _get_llm_response(messages, enable_tools, agent_name)
+        response = _get_llm_response(messages, enable_tools, agent_name, use_web_search)
     # if response['choices'][0]['message']['content']:
     #     logging.info(response['choices'][0]['message']['content'])
     global input_token,output_token
@@ -205,4 +244,3 @@ def get_llm_response(messages, enable_tools=True, agent_name=''):
     output_token+=response['usage']['completion_tokens']
     logging.info(f"Input token: {input_token}, Output token: {output_token}")
     return response
-    
