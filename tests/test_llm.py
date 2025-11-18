@@ -30,7 +30,7 @@ def test_build_request_body_honors_configured_temperature(monkeypatch):
 def test_build_request_body_with_web_search(monkeypatch):
     monkeypatch.setattr(config, "enable_web_search", True)
     monkeypatch.setattr(config, "web_search_provider", "gpt-5-web")
-    monkeypatch.setattr(config, "web_search_model", "gpt-5.1-search")
+    monkeypatch.setattr(config, "web_search_model", "gpt-5-search-api")
     monkeypatch.setattr(config, "temperature", None)
 
     body = llm.build_request_body([
@@ -40,7 +40,7 @@ def test_build_request_body_with_web_search(monkeypatch):
     assert "functions" not in body
     assert body["tools"][0]["provider"] == {
         "type": "gpt-5-web",
-        "model": "gpt-5.1-search",
+        "model": "gpt-5-search-api",
     }
 
 
