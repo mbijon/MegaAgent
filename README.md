@@ -23,7 +23,7 @@ Some experiments are shown in `examples/` using an older version of MegaAgent. Y
 `config.py` now defaults to OpenAI's GPT-5.1 model and reads runtime overrides from environment variables:
 
 - `OPENAI_API_KEY` (or `MEGAAGENT_API_KEY`) provides credentials.
-- `MEGAAGENT_MODEL`, `OPENAI_CHAT_URL`, and `MEGAAGENT_ENABLE_WEB_SEARCH` let you change the deployed model, API endpoint, and opt into the GPT-5 web search tool. When using the Chat Completions API, MegaAgent registers that capability via the documented `type: "web_search"` tool so OpenAI wires up the hosted search provider without custom glue code.
+- `MEGAAGENT_MODEL`, `OPENAI_CHAT_URL`, and `MEGAAGENT_ENABLE_WEB_SEARCH` let you change the deployed model, API endpoint, and control the GPT-5 web search tool (on by default, but disable it by setting the env var to `false`). When using the Chat Completions API, MegaAgent registers that capability via the documented `type: "web_search"` tool so OpenAI wires up the hosted search provider without custom glue code.
 - `MEGAAGENT_WEB_SEARCH_MODEL` / `MEGAAGENT_WEB_SEARCH_PROVIDER` fine-tune which search backend is attached to chat completions.
 - `MEGAAGENT_TEMPERATURE` optionally overrides the thinking-model temperature; leave it unset to rely on OpenAI's default value of 1 per the latest GPT-5.1 guidance.
 
